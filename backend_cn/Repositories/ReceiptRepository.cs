@@ -25,10 +25,17 @@ namespace backend_cn.Repositories
                     newReceipt = new Receipt { ReceiptCode = receipt.ReceiptCode, CreateDate = DateTime.Now, FullTotal = receipt.FullTotal, DiscountTotal = receipt.DiscountTotal, SubTotal = receipt.SubTotal, GrandTotal = receipt.GrandTotal };
                     context.Receipts.Add(newReceipt);
                     context.SaveChanges();
-                    for(int i = 0; i < receipt.ReceiptDetail.Length; i++)
+                    for (int i = 0; i < receipt.ReceiptDetail.Length; i++)
                     {
-                        context.ReceiptDetails.Add(new ReceiptDetail { Amount = receipt.ReceiptDetail[i].Amount, DiscountPercent = receipt.ReceiptDetail[i].DiscountPercent, DiscountTotal = receipt.ReceiptDetail[i].DiscountTotal, Total = receipt.ReceiptDetail[i].Total, ReceiptId = newReceipt.ReceiptId, ProductId = receipt.ReceiptDetail[i].ProductId });
-                        
+                        context.ReceiptDetails.Add(new ReceiptDetail
+                        {
+                            Amount = receipt.ReceiptDetail[i].Amount,
+                            DiscountPercent = receipt.ReceiptDetail[i].DiscountPercent,
+                            DiscountTotal = receipt.ReceiptDetail[i].DiscountTotal,
+                            Total = receipt.ReceiptDetail[i].Total,
+                            ReceiptId = newReceipt.ReceiptId,
+                            ProductId = receipt.ReceiptDetail[i].ProductId
+                        });
                     }
                     context.SaveChanges();
                     transaction.Commit();

@@ -2,7 +2,7 @@
 {
     public class ReceiptViewModel
     {
-        public string? ReceiptCode { get; set; } = string.Empty;
+        public string ReceiptCode { get; set; } = string.Empty;
         public decimal FullTotal { get; set; }
         public decimal DiscountTotal { get; set; }
         public decimal SubTotal { get; set; }
