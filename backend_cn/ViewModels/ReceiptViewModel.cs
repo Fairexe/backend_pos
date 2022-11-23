@@ -6,6 +6,7 @@
         public decimal FullTotal { get; set; }
         public decimal DiscountTotal { get; set; }
         public decimal SubTotal { get; set; }
+        public decimal TradeDiscount { get; set; }
         public decimal GrandTotal { get; set; }
         public ReceiptDetailViewModel[] ReceiptDetail { get; set; } = new ReceiptDetailViewModel[0];
     }

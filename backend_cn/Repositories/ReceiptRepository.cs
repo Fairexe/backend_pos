@@ -1,5 +1,4 @@
 ﻿using backend_cn.Context;
-using backend_cn.Controllers;
 using backend_cn.Models;
 using backend_cn.ViewModels;
 
@@ -14,15 +13,29 @@ namespace backend_cn.Repositories
             this.context = context;
         }
 
+        public List<Receipt> GetReceipts()
+        {
+            using (var transaction = context.Database.BeginTransaction())
+            {
+
+                var receipts = context.Receipts.ToList();
+                return receipts;
+            }
+        }
+
         public ApiResultViewModel Add(ReceiptViewModel receipt)
         {
             Receipt newReceipt = new Receipt();
             var result = new ApiResultViewModel();
+            string code = "T";
             using (var transaction = context.Database.BeginTransaction())
             {
                 try
                 {
-                    newReceipt = new Receipt { ReceiptCode = receipt.ReceiptCode, CreateDate = DateTime.Now, FullTotal = receipt.FullTotal, DiscountTotal = receipt.DiscountTotal, SubTotal = receipt.SubTotal, GrandTotal = receipt.GrandTotal };
+                    string count = (context.Receipts.ToList().Count + 1).ToString();
+                    string newString = count.PadLeft(4, '0');
+                    code += newString;
+                    newReceipt = new Receipt { ReceiptCode = code, CreateDate = DateTime.Now, FullTotal = receipt.FullTotal, DiscountTotal = receipt.DiscountTotal, SubTotal = receipt.SubTotal, TradeDiscount = receipt.TradeDiscount, GrandTotal = receipt.GrandTotal };
                     context.Receipts.Add(newReceipt);
                     context.SaveChanges();
                     for (int i = 0; i < receipt.ReceiptDetail.Length; i++)

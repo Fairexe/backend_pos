@@ -19,7 +19,14 @@ namespace backend_cn.Controllers
         public IActionResult AddReceipt([FromBody] ReceiptViewModel receipt)
         {
             var result = receiptRepository.Add(receipt);
-            return new JsonResult(receipt.ReceiptDetail);
+            return new JsonResult(result);
+        }
+
+        [HttpGet]
+        public IActionResult GetReceipts()
+        {
+            var result = receiptRepository.GetReceipts();
+            return new JsonResult(result);
         }
     }
 }

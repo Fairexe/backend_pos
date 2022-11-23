@@ -27,7 +27,7 @@ namespace backend_cn.Context
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseMySql("server=localhost;port=3306;uid=root;password=1234;database=pos_db", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.31-mysql"));
+                optionsBuilder.UseMySql("server=127.0.0.1;port=3306;uid=root;password=1234;database=pos_db", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.31-mysql"));
             }
         }
 
@@ -100,6 +100,10 @@ namespace backend_cn.Context
                 entity.Property(e => e.SubTotal)
                     .HasPrecision(11, 2)
                     .HasColumnName("sub_total");
+
+                entity.Property(e => e.TradeDiscount)
+                    .HasPrecision(11, 2)
+                    .HasColumnName("trade_discount");
             });
 
             modelBuilder.Entity<ReceiptDetail>(entity =>
