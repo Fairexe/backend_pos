@@ -19,4 +19,10 @@
         public decimal Total { get; set; }
         public int ProductId { get; set; }
     }
+
+    public class ReceiptDateViewModel
+    {
+        public DateTime? StartDate { get; set; } = new DateTime ();
+        public DateTime? EndDate { get; set; } = new DateTime ();
+    }
 }

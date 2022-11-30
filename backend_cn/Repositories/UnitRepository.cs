@@ -53,57 +53,62 @@ namespace backend_cn.Repositories
 
         //    return units;
         //}
-        public List<UnitViewModel> GetUnits()
+        public ApiResultViewModel<List<UnitViewModel>> GetUnits()
         {
-            using (var transaction = context.Database.BeginTransaction())
-            {
-
-                    var units = (from u in context.Units
-                                 select new UnitViewModel
-                                 {
-                                     Uid = u.UId,
-                                     UnitName = u.UnitName
-                                 })
-                                 .OrderBy(x => x.Uid)
-                                 .ToList();
-
-                return units;
-            }
+            var units = (from u in context.Units
+                         select new UnitViewModel
+                         {
+                             Uid = u.UId,
+                             UnitName = u.UnitName
+                         })
+                         .OrderBy(x => x.Uid)
+                         .ToList();
+            var result = new ApiResultViewModel<List<UnitViewModel>> {
+                StatusCode = 0,
+                Message = "successful" ,
+                Data = units
+            };
+            return result;
         }
 
-        public UnitViewModel GetUnitById(int id)
+        public ApiResultViewModel<UnitViewModel> GetUnitById(int id)
         {
-            using (var transaction = context.Database.BeginTransaction())
-            {
-
-                var unit = context.Units.Single(item => item.UId == id);
-                var reult = new UnitViewModel { Uid = unit.UId, UnitName = unit.UnitName };
-                return reult;
-            }
+            var unit = context.Units.Single(item => item.UId == id);
+            var reult = new ApiResultViewModel<UnitViewModel> { 
+                StatusCode = 0,
+                Message = "successful",
+                Data = new UnitViewModel {
+                    Uid = unit.UId,
+                    UnitName = unit.UnitName 
+                } 
+            };
+            return reult;
         }
 
-        public ApiResultViewModel Update(int id, string name)
+        public ApiResultViewModel Update(EditUnitViewModel editUnit)
         {
+            if (editUnit.UnitName == "")
+            {
+                return new ApiResultViewModel { StatusCode = 1, Message = " Cannot be null" };
+            }
             var result = new ApiResultViewModel();
             using (var transaction = context.Database.BeginTransaction())
             {
                 try
                 {
-                    var units = (from u in context.Units
-                                 .Where(u => u.UnitName == name)
-                                 select new UnitViewModel
-                                 {
-                                     Uid = u.UId,
-                                     UnitName = u.UnitName
-                                 })
-                                 .ToList();
-                    if (units.Count > 0)
+                    var unit = context.Units.Single(x => x.UId == editUnit.Uid);
+
+                    if (unit.UnitName != editUnit.UnitName)
                     {
-                        result = new ApiResultViewModel { statusCode = 1, message = " duplicated name" };
-                        return result;
+                        var duplicatename = context.Units.Any(u => u.UnitName == editUnit.UnitName);
+                        if (duplicatename)
+                        {
+                            result = new ApiResultViewModel { StatusCode = 1, Message = " duplicated name" };
+                            return result;
+                        }
                     }
-                    var unit = context.Units.Single(x => x.UId == id);
-                    unit.UnitName = name;
+
+                    unit.UnitName = editUnit.UnitName;
                     context.SaveChanges();
                     transaction.Commit();
                 }
@@ -111,32 +116,30 @@ namespace backend_cn.Repositories
                 {
                     transaction.Rollback();
                 }
-                result = new ApiResultViewModel { statusCode = 0, message = name + "successful" };
+                result = new ApiResultViewModel { StatusCode = 0, Message = editUnit.UnitName + " successful" };
                 return result;
             }
         }
 
-        public ApiResultViewModel Add(string name)
+        public ApiResultViewModel Add(AddUnitViewModel param)
         {
+            if(param.UnitName == "")
+            {
+                return new ApiResultViewModel { StatusCode = 0, Message = " Cannot be null" };
+            }
             var result = new ApiResultViewModel();
             using (var transaction = context.Database.BeginTransaction())
             {
                 try
                 {
-                    var units = (from u in context.Units
-                                 .Where(u => u.UnitName == name)
-                                 select new UnitViewModel
-                                 {
-                                     Uid = u.UId,
-                                     UnitName = u.UnitName
-                                 })
-                                 .ToList();
-                    if(units.Count > 0)
+                    var duplicatename = context.Units.Any(u => u.UnitName == param.UnitName);
+
+                    if (duplicatename)
                     {
-                        result = new ApiResultViewModel { statusCode = 1, message = " duplicated name" };
+                        result = new ApiResultViewModel { StatusCode = 1, Message = " duplicated name" };
                         return result;
                     }
-                    context.Units.Add(new Unit { UnitName = name });    
+                    context.Units.Add(new Unit { UnitName = param.UnitName });
                     context.SaveChanges();
                     transaction.Commit();
                 }
@@ -144,7 +147,7 @@ namespace backend_cn.Repositories
                 {
                     transaction.Rollback();
                 }
-                result = new ApiResultViewModel { statusCode = 0, message = name + "successful" };
+                result = new ApiResultViewModel { StatusCode = 0, Message = param.UnitName + "successful" };
                 return result;
             }
         }
@@ -155,9 +158,10 @@ namespace backend_cn.Repositories
             {
                 try
                 {
-                    if(id == 0)
+                    var alreadyUse = context.Products.Any(item => item.UnitId == id);
+                    if (alreadyUse)
                     {
-                        return new ApiResultViewModel { statusCode = 2, message = "cant delete unit already in use by product" };
+                        return new ApiResultViewModel { StatusCode = 1, Message = "cant delete unit already in use by product" };
                     }
                     var unit = context.Units.Single(item => item.UId == id);
                     context.Units.Remove(unit);
@@ -168,7 +172,7 @@ namespace backend_cn.Repositories
                 {
                     transaction.Rollback();
                 }
-                return new ApiResultViewModel { statusCode = 0, message = "Successful" };
+                return new ApiResultViewModel { StatusCode = 0, Message = "Successful" };
             }
         }
     }

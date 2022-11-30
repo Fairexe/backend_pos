@@ -28,5 +28,26 @@ namespace backend_cn.Controllers
             var result = receiptRepository.GetReceipts();
             return new JsonResult(result);
         }
+
+        [HttpGet]
+        public IActionResult GetReceiptById(int id)
+        {
+            var result = receiptRepository.GetReceiptById(id);
+            return new JsonResult(result);
+        }
+
+        [HttpGet]
+        public IActionResult GetReceiptByDate(ReceiptDateViewModel date)
+        {
+            var result = receiptRepository.GetReceiptByDate(date);
+            return new JsonResult(result);
+        }
+
+        [HttpGet]
+        public IActionResult GetReceiptDetailById(int id)
+        {
+            var result = receiptRepository.GetReceiptDetailById(id);
+            return new JsonResult(result);
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using backend_cn.Repositories;
+using backend_cn.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection.Emit;
 
@@ -21,25 +22,26 @@ namespace backend_cn.Controllers
             return new JsonResult(products);
         }
 
-        [HttpPost]
-        public IActionResult RemoveProduct(int id)
+        [HttpDelete]
+        [Route("{id}")]
+        public IActionResult RemoveProduct([FromRoute] int id)
         {
             var products = productRepository.RemoveById(id);
             return new JsonResult(products);
         }
 
         [HttpPost]
-        public IActionResult AddProduct(string code, string name, decimal price, int unitId)
+        public IActionResult AddProduct([FromBody] AddProductViewModel product)
         {
-            var products = productRepository.Add(code, name, price, unitId);
+            var products = productRepository.Add(product);
             return new JsonResult(products);
         }
 
         [HttpPost]
-        public IActionResult UpdateProduct(int id, string code, string name, decimal price, int unitId)
+        public IActionResult UpdateProduct([FromBody] UpdateProductViewModel updateProduct)
         {
-            var products = productRepository.Update(id, code, name, price, unitId);
-            return new JsonResult(products);
+            var product = productRepository.Update(updateProduct);
+            return new JsonResult(product);
         }
     }
 }
