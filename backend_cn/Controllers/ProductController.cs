@@ -1,4 +1,5 @@
-﻿using backend_cn.Repositories;
+﻿using backend_cn.BusinessLogic.Product;
+using backend_cn.Repositories.Product;
 using backend_cn.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection.Emit;
@@ -8,17 +9,19 @@ namespace backend_cn.Controllers
     [Route("[controller]/[action]")]
     public class ProductController : ControllerBase
     {
-        readonly ProductRepository productRepository;
+        readonly ProductManage productManage;
+        readonly ProductDetail productDetail;
 
-        public ProductController(ProductRepository productRepository)
+        public ProductController(ProductManage productManage, ProductDetail productDetail)
         {
-            this.productRepository = productRepository;
+            this.productManage = productManage;
+            this.productDetail = productDetail;
         }
 
         [HttpGet]
         public IActionResult GetProducts()
         {
-            var products = productRepository.GetProducts();
+            var products = productDetail.GetProducts();
             return new JsonResult(products);
         }
 
@@ -26,21 +29,21 @@ namespace backend_cn.Controllers
         [Route("{id}")]
         public IActionResult RemoveProduct([FromRoute] int id)
         {
-            var products = productRepository.RemoveById(id);
+            var products = productManage.RemoveById(id);
             return new JsonResult(products);
         }
 
         [HttpPost]
         public IActionResult AddProduct([FromBody] AddProductViewModel product)
         {
-            var products = productRepository.Add(product);
+            var products = productManage.Add(product);
             return new JsonResult(products);
         }
 
         [HttpPost]
         public IActionResult UpdateProduct([FromBody] UpdateProductViewModel updateProduct)
         {
-            var product = productRepository.Update(updateProduct);
+            var product = productManage.Update(updateProduct);
             return new JsonResult(product);
         }
     }

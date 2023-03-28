@@ -1,14 +1,15 @@
-﻿using backend_cn.Context;
+﻿using backend_cn.APIResult;
+using backend_cn.Context;
 using backend_cn.Models;
 using backend_cn.ViewModels;
 
-namespace backend_cn.Repositories
+namespace backend_cn.Repositories.unit
 {
-    public class UnitRepository
+    public class UnitRepositoryMySql : IUnitRepository
     {
         readonly PosDbContext context;
 
-        public UnitRepository(PosDbContext context)
+        public UnitRepositoryMySql(PosDbContext context)
         {
             this.context = context;
         }
@@ -53,7 +54,7 @@ namespace backend_cn.Repositories
 
         //    return units;
         //}
-        public ApiResultViewModel<List<UnitViewModel>> GetUnits()
+        public List<UnitViewModel> GetUnits()
         {
             var units = (from u in context.Units
                          select new UnitViewModel
@@ -63,51 +64,26 @@ namespace backend_cn.Repositories
                          })
                          .OrderBy(x => x.Uid)
                          .ToList();
-            var result = new ApiResultViewModel<List<UnitViewModel>> {
-                StatusCode = 0,
-                Message = "successful" ,
-                Data = units
-            };
-            return result;
+            return units;
         }
 
-        public ApiResultViewModel<UnitViewModel> GetUnitById(int id)
+        public UnitViewModel GetUnitById(int id)
         {
             var unit = context.Units.Single(item => item.UId == id);
-            var reult = new ApiResultViewModel<UnitViewModel> { 
-                StatusCode = 0,
-                Message = "successful",
-                Data = new UnitViewModel {
-                    Uid = unit.UId,
-                    UnitName = unit.UnitName 
-                } 
+            return new UnitViewModel
+            {
+                Uid = unit.UId,
+                UnitName = unit.UnitName
             };
-            return reult;
         }
 
-        public ApiResultViewModel Update(EditUnitViewModel editUnit)
+        public void Update(EditUnitViewModel editUnit)
         {
-            if (editUnit.UnitName == "")
-            {
-                return new ApiResultViewModel { StatusCode = 1, Message = " Cannot be null" };
-            }
-            var result = new ApiResultViewModel();
             using (var transaction = context.Database.BeginTransaction())
             {
                 try
                 {
                     var unit = context.Units.Single(x => x.UId == editUnit.Uid);
-
-                    if (unit.UnitName != editUnit.UnitName)
-                    {
-                        var duplicatename = context.Units.Any(u => u.UnitName == editUnit.UnitName);
-                        if (duplicatename)
-                        {
-                            result = new ApiResultViewModel { StatusCode = 1, Message = " duplicated name" };
-                            return result;
-                        }
-                    }
-
                     unit.UnitName = editUnit.UnitName;
                     context.SaveChanges();
                     transaction.Commit();
@@ -115,54 +91,59 @@ namespace backend_cn.Repositories
                 catch (Exception ex)
                 {
                     transaction.Rollback();
+                    throw;
                 }
-                result = new ApiResultViewModel { StatusCode = 0, Message = editUnit.UnitName + " successful" };
-                return result;
             }
         }
 
-        public ApiResultViewModel Add(AddUnitViewModel param)
+        public bool CheckDuplicateName(string name)
         {
-            if(param.UnitName == "")
+            var duplicatename = context.Units.Any(u => u.UnitName == name);
+
+            if (duplicatename)
             {
-                return new ApiResultViewModel { StatusCode = 0, Message = " Cannot be null" };
+                return true;
             }
-            var result = new ApiResultViewModel();
+            else
+            {
+                return false;
+            }
+        }
+
+        public bool CheckUnitIsUsed(int id)
+        {
+            var alreadyUse = context.Products.Any(item => item.UnitId == id);
+            if (alreadyUse)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public void Add(AddUnitViewModel unit)
+        {
             using (var transaction = context.Database.BeginTransaction())
             {
                 try
                 {
-                    var duplicatename = context.Units.Any(u => u.UnitName == param.UnitName);
-
-                    if (duplicatename)
-                    {
-                        result = new ApiResultViewModel { StatusCode = 1, Message = " duplicated name" };
-                        return result;
-                    }
-                    context.Units.Add(new Unit { UnitName = param.UnitName });
+                    context.Units.Add(new Unit { UnitName = unit.UnitName });
                     context.SaveChanges();
                     transaction.Commit();
                 }
                 catch (Exception ex)
                 {
                     transaction.Rollback();
+                    throw new Exception(ex.ToString());
                 }
-                result = new ApiResultViewModel { StatusCode = 0, Message = param.UnitName + "successful" };
-                return result;
             }
         }
 
-        public ApiResultViewModel RemoveById(int id)
+        public void RemoveById(int id)
         {
             using (var transaction = context.Database.BeginTransaction())
             {
                 try
                 {
-                    var alreadyUse = context.Products.Any(item => item.UnitId == id);
-                    if (alreadyUse)
-                    {
-                        return new ApiResultViewModel { StatusCode = 1, Message = "cant delete unit already in use by product" };
-                    }
                     var unit = context.Units.Single(item => item.UId == id);
                     context.Units.Remove(unit);
                     context.SaveChanges();
@@ -171,8 +152,8 @@ namespace backend_cn.Repositories
                 catch (Exception ex)
                 {
                     transaction.Rollback();
+                    throw;
                 }
-                return new ApiResultViewModel { StatusCode = 0, Message = "Successful" };
             }
         }
     }

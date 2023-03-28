@@ -1,4 +1,4 @@
-﻿namespace backend_cn.ViewModels
+﻿namespace backend_cn.APIResult
 {
     public class ApiResultViewModel
     {

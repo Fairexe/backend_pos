@@ -1,30 +1,31 @@
-﻿using backend_cn.Repositories;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using backend_cn.ViewModels;
+using backend_cn.BusinessLogic.Unit;
 
 namespace backend_cn.Controllers
 {
     [Route("[controller]/[action]")]
     public class UnitController : ControllerBase
     {
-        readonly UnitRepository unitRepository;
-        
-        public UnitController(UnitRepository unitRepository)
+        readonly UnitManage unitManage;
+        readonly UnitDetail unitDetail;
+        public UnitController(UnitManage unitManage, UnitDetail unitDetail)
         {
-            this.unitRepository = unitRepository;
+            this.unitManage = unitManage;
+            this.unitDetail = unitDetail;
         }
         
         [HttpPost]
         public IActionResult AddUnit([FromBody]AddUnitViewModel param)
         {
-            var units = unitRepository.Add(param);
+            var units = unitManage.Add(param);
             return new JsonResult(units);
         }
 
         [HttpGet]
         public IActionResult GetUnitById(int id)
         {
-            var units = unitRepository.GetUnitById(id);
+            var units = unitDetail.GetUnitById(id);
             return new JsonResult(units);
         }
 
@@ -32,21 +33,21 @@ namespace backend_cn.Controllers
         [Route("{id}")]//http://localhost:10001/Unit/RemoveUnitById/10
         public IActionResult RemoveUnitById([FromRoute]int id)
         {
-            var units = unitRepository.RemoveById(id);
+            var units = unitManage.RemoveById(id);
             return new JsonResult(units);
         }
 
         [HttpPost]
         public IActionResult UpdateUnit([FromBody] EditUnitViewModel unit)
         {
-            var units = unitRepository.Update(unit);
+            var units = unitManage.Update(unit);
             return new JsonResult(units);
         }
 
         [HttpGet]
         public IActionResult GetUnits()
         {
-            var units = unitRepository.GetUnits();
+            var units = unitDetail.GetUnits();
             return new JsonResult(units);
         }
     }

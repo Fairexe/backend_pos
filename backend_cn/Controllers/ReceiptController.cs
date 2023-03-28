@@ -1,5 +1,5 @@
-﻿using backend_cn.Models;
-using backend_cn.Repositories;
+﻿using backend_cn.BusinessLogic.receipt;
+using backend_cn.BusinessLogic.Receipt;
 using backend_cn.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,45 +8,48 @@ namespace backend_cn.Controllers
     [Route("[controller]/[action]")]
     public class ReceiptController : ControllerBase
     {
-        readonly ReceiptRepository receiptRepository;
+        readonly ReceiptManage receiptManage;
+        readonly ReceiptDetail receiptDetail;
 
-        public ReceiptController(ReceiptRepository receiptRepository)
+        public ReceiptController(ReceiptManage receiptManage, ReceiptDetail receiptDetail)
         {
-            this.receiptRepository = receiptRepository;
+            this.receiptManage =  receiptManage;
+            this.receiptDetail = receiptDetail;
         }
 
         [HttpPost]
         public IActionResult AddReceipt([FromBody] ReceiptViewModel receipt)
         {
-            var result = receiptRepository.Add(receipt);
+            var result = receiptManage.Add(receipt);
             return new JsonResult(result);
         }
 
         [HttpGet]
         public IActionResult GetReceipts()
         {
-            var result = receiptRepository.GetReceipts();
+            var result = receiptDetail.GetReceipts();
             return new JsonResult(result);
         }
 
         [HttpGet]
         public IActionResult GetReceiptById(int id)
         {
-            var result = receiptRepository.GetReceiptById(id);
+            var result = receiptDetail.GetReceiptById(id);
             return new JsonResult(result);
         }
 
         [HttpGet]
         public IActionResult GetReceiptByDate(ReceiptDateViewModel date)
         {
-            var result = receiptRepository.GetReceiptByDate(date);
+            Console.WriteLine(date);
+            var result = receiptDetail.GetReceiptByDate(date);
             return new JsonResult(result);
         }
 
         [HttpGet]
         public IActionResult GetReceiptDetailById(int id)
         {
-            var result = receiptRepository.GetReceiptDetailById(id);
+            var result = receiptDetail.GetReceiptDetailById(id);
             return new JsonResult(result);
         }
     }
